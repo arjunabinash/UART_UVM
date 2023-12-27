@@ -1,0 +1,48 @@
+class uart_rx_monitor extends uvm_monitor;
+     virtual UART_IF vif;
+         uart_tx tr;
+
+        uvm_analysis_port#(uart_tx) item_collected_port_rx;
+
+        `uvm_component_utils(uart_rx_monitor)
+
+   function new(string name, uvm_component parent = null);
+     super.new(name, parent);
+     item_collected_port_rx = new("item_collected_port_rx", this);
+   endfunction: new
+
+   virtual function void build_phase(uvm_phase phase);
+     uart_rx_agent agent;
+     if ($cast(agent, get_parent()) && agent != null) begin
+       vif = agent.vif;
+     end
+     else begin
+       virtual UART_IF tmp;
+     if (!uvm_config_db#(virtual UART_IF)::get(this, "", "UART_IF", vif)) begin
+       `uvm_fatal("UART/MON/NOVIF", "No virtual interface specified for this monitor instance")
+       end
+       vif = tmp;
+     end
+   endfunction
+        
+        
+  virtual task run_phase(uvm_phase phase);
+
+     uart_tx tr;
+     tr =uart_tx::type_id::create("tr");
+    forever begin
+
+      @(posedge vif.i_Clock)
+      if(vif.o_RX_DV==1) begin
+         tr.r_RX_Byte = vif.o_RX_Byte;
+ 
+      
+      uvm_report_info("UART_RX_MONITER ", $psprintf("Got Transaction %s",tr.convert4string()));
+      
+        @(posedge vif.i_Clock)
+      item_collected_port_rx.write(tr);
+      end 
+    end
+   endtask
+      
+      endclass: uart_rx_monitor

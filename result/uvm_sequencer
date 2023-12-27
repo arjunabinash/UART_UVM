@@ -1,0 +1,9 @@
+class uart_tx_sequencer extends uvm_sequencer #(uart_tx);
+
+   `uvm_component_utils(uart_tx_sequencer)
+ 
+   function new(input string name, uvm_component parent=null);
+      super.new(name, parent);
+   endfunction : new
+
+endclass : uart_tx_sequencer

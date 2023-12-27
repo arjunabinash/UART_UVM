@@ -1,0 +1,37 @@
+class uart_base_test extends uvm_test;
+
+ `uvm_component_utils(uart_base_test);
+         uart_env  env;
+         uart_tx_config cfg;
+         uart_tx_seq uart_seq;
+  virtual UART_IF vif;
+  
+          function new(string name = "uart_base_test", uvm_component parent = null);
+    super.new(name, parent);
+  endfunction
+
+  function void build_phase(uvm_phase phase);
+    cfg = uart_tx_config::type_id::create("cfg", this);
+    env = uart_env::type_id::create("env", this);
+    //
+    if (!uvm_config_db#(virtual UART_IF)::get(this, "", "vif", vif)) begin
+      `uvm_fatal("UART/DRV/NOVIF", "No virtual interface specified for this test instance")
+    end 
+    uvm_config_db#(virtual UART_IF)::set( this, "env", "vif", vif);
+  endfunction
+
+  task run_phase( uvm_phase phase );
+    uart_tx_seq uart_seq;
+    uart_seq = uart_tx_seq::type_id::create("uart_seq");
+    phase.raise_objection( this, "Starting uart_tx_seqin main phase" );
+    `uvm_info ("UART/TEST","Phase raise Objection",UVM_LOW)
+    $display("%t Starting sequence uart_seq run_phase",$time);
+    uart_seq.start(env.agent_tx.sqr);
+    #100000ns;
+    phase.drop_objection( this , "Finished uart_seq in main phase" );
+    `uvm_info ("UART/TEST","Phase drop Objection",UVM_LOW)
+    $display("%t ending sequence uart_seq run_phase",$time);
+  endtask: run_phase
+  
+  
+endclass

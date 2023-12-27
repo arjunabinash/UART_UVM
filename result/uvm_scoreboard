@@ -1,0 +1,43 @@
+class uart_scoreboard extends uvm_scoreboard;
+
+  `uvm_component_utils(uart_scoreboard);
+                        
+     uvm_tlm_analysis_fifo #(uart_tx) tx_fifo;
+     uvm_tlm_analysis_fifo #(uart_tx) rx_fifo;
+  
+  uart_tx  input_sequence_item;
+  uart_tx output_sequence_item;
+                 
+  function new(string name,uvm_component parent);
+    super.new(name,parent);
+  endfunction  
+               
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    tx_fifo = new("tx_fifo",this);
+    rx_fifo = new("rx_fifo",this);
+  endfunction
+  
+   task run_phase(uvm_phase phase);
+   uart_tx input_sequence_item, output_sequence_item;
+  forever begin
+    `uvm_info("scoreboard run task", "Waiting for EXPECTED values",UVM_MEDIUM)
+    tx_fifo.get(input_sequence_item);
+    `uvm_info("scoreboard run task", "Waiting for ACTUAL values",UVM_MEDIUM)
+    rx_fifo.get(output_sequence_item);
+    
+    `uvm_info("scoreboard ",$sformatf( "input_sequence_item=%h output_sequence_item=%h",input_sequence_item.i_TX_Byte, output_sequence_item.r_RX_Byte),UVM_MEDIUM)
+    
+    if (output_sequence_item.r_RX_Byte == input_sequence_item.i_TX_Byte) begin
+
+      `uvm_info ("ACTUAL = EXPECTED ", $sformatf("ACTUAL=%s EXPECTED=%s \n",output_sequence_item.convert33string(),input_sequence_item.convert3string()), UVM_NONE);
+      $display("PPPPPPP    AA     SSSSSSS   SSSSSSS\nPP   PP  AA  AA   SS        SS\nPPPPPP  AAAAAAAA  SSSSSSS   SSSSSSS\nPP      AA    AA       SS        SS\nPP      AA    AA  SSSSSSS   SSSSSSS");
+    end  
+else begin
+  `uvm_error("ACTUAL != EXPECTED", $sformatf("ACTUAL=%s EXPECTED=%s \n",output_sequence_item.convert33string(), input_sequence_item.convert3string()));
+  
+$display("FFFFFFF    AA     IIIIIIII   LL\nFF       AA  AA      II      LL\nFFFFF   AAAAAAAA     II      LL\nFF      AA    AA     II      LL\nFF      AA    AA  IIIIIIII   LLLLLLL");
+end
+end
+endtask
+ endclass:uart_scoreboard

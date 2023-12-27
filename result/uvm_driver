@@ -1,0 +1,48 @@
+class uart_tx_driver extends uvm_driver #(uart_tx);
+  
+  `uvm_component_utils(uart_tx_driver)
+  
+  virtual UART_IF vif ;
+          
+  function new(input string name, uvm_component parent=null);
+      super.new(name, parent);
+   endfunction : new
+  
+   function void build_phase(uvm_phase phase);
+   
+       if (!uvm_config_db#(virtual UART_IF)::get(this, "", "vif", vif)) begin
+         `uvm_fatal("UART/DRV/NOVIF", "No virtual interface specified for this driver instance")
+         end
+   endfunction
+  
+  virtual task run_phase(uvm_phase phase);
+    super.run_phase(phase);
+    
+     vif.i_TX_Byte=0;
+       vif.i_TX_DV=0;
+       vif.o_TX_Serial=0;
+     forever begin
+       uart_tx tr;
+      
+       
+    @ (posedge vif.i_Clock);
+ 
+       seq_item_port.get_next_item(tr);
+  
+       uvm_report_info("UART_DRIVER ", $psprintf("Got Transaction %s",tr.convert2string()));
+    
+    @ (this.vif.i_Clock);
+       
+           vif.i_TX_Byte=tr.i_TX_Byte;
+           vif.i_TX_DV=1;
+       
+    @ (this.vif.i_Clock);
+          vif.i_TX_DV=0;
+       
+       
+       
+       seq_item_port.item_done();
+       
+     end
+  endtask
+endclass:uart_tx_driver

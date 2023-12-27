@@ -1,0 +1,35 @@
+class uart_tx extends uvm_sequence_item;
+ 
+  bit    i_TX_DV;     
+  rand logic [7:0] i_TX_Byte; 
+  reg [7:0]   r_RX_Byte;
+  reg         r_RX_DV;
+  
+  `uvm_object_utils(uart_tx)
+  
+   
+  function new (string name = "uart_tx");
+      super.new(name);
+   endfunction
+
+   function string convert2string();
+     return $psprintf("i_TX_DV=%0h  i_TX_Byte=%0h  " ,i_TX_DV,i_TX_Byte);
+   endfunction
+  
+   function string convert3string();
+     return $psprintf("i_TX_Byte=%0h  ",i_TX_Byte);
+   endfunction
+  
+   function string convert33string();
+     return $psprintf("  r_RX_Byte=%0h ",r_RX_Byte);
+   endfunction
+  
+   function string convert4string();
+     return $psprintf("r_RX_Byte=%0h ",r_RX_Byte);
+   endfunction
+  
+  function string convert5string();
+    return $psprintf("i_TX_Byte=%0h ",i_TX_Byte);
+   endfunction
+
+endclass: uart_tx

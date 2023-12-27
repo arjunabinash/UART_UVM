@@ -1,0 +1,14 @@
+typedef uart_tx_config;
+typedef uart_tx_agent;
+typedef uart_rx_agent;
+
+class uart_tx_config extends uvm_object;
+
+   `uvm_object_utils(uart_tx_config)
+   virtual UART_IF vif;
+
+  function new(string name="uart_tx_config");
+     super.new(name);
+  endfunction
+
+endclass

@@ -1,0 +1,21 @@
+class uart_tx_seq extends uvm_sequence#(uart_tx);
+
+  `uvm_object_utils(uart_tx_seq)
+       uart_tx uart_trans;
+  
+  function new(string name ="");
+    super.new(name);
+  endfunction
+
+  task body();
+
+    uart_trans = uart_tx::type_id::create("uart_trans");
+      
+    for(int i=0;i<2;i++) begin
+      start_item(uart_trans);
+     assert(uart_trans.randomize() with { i_TX_Byte == 8'h5a;});
+      finish_item(uart_trans);
+      end
+  endtask
+  
+endclass

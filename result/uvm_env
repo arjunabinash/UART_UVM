@@ -1,0 +1,31 @@
+class uart_env  extends uvm_env;
+  virtual UART_IF  vif;
+   `uvm_component_utils(uart_env);
+     uart_tx_agent agent_tx;
+     uart_rx_agent agent_rx;
+  uart_scoreboard scoreboard;
+  
+
+   function new(string name, uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   function void build_phase(uvm_phase phase);
+     agent_tx = uart_tx_agent::type_id::create("agent_tx", this);
+     agent_rx = uart_rx_agent::type_id::create("agent_rx", this);
+    scoreboard =uart_scoreboard::type_id::create("scoreboard",this);    
+     if (!uvm_config_db#(virtual UART_IF)::get(this, "", "vif", vif)) begin
+         `uvm_fatal("APB/AGT/NOVIF", "No virtual interface specified for this env instance")
+     end
+     uvm_config_db#(virtual UART_IF)::set( this, "agent_tx", "vif", vif);
+     uvm_config_db#(virtual UART_IF)::set( this, "agent_rx", "vif", vif);
+   endfunction: build_phase
+   
+  function void connect_phase(uvm_phase phase);
+    agent_tx.mon.item_collected_port_tx.connect(scoreboard.tx_fifo.analysis_export);
+    `uvm_info("environment","TX monitor  connected scoreboard",UVM_LOW);    
+    agent_rx.mon.item_collected_port_rx.connect(scoreboard.rx_fifo.analysis_export);
+    `uvm_info("environment","RX monitor connected to scoreboard",UVM_LOW);
+  endfunction  
+              
+              endclass:uart_env
